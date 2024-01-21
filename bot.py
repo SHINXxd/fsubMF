@@ -60,7 +60,7 @@ async def start(bot: Client, cmd: Message):
     if cmd.from_user.id in Config.BANNED_USERS:
         await cmd.reply_text("Sorry, You are banned.")
         return
-    if Config.UPDATES_CHANNEL is not None:
+    if Config.FORCE_SUB_CHANNELS is not None:
         back = await handle_force_sub(bot, cmd)
         if back == 400:
             return
@@ -118,17 +118,17 @@ async def main(bot: Client, message: Message):
 
         await add_user_to_database(bot, message)
 
-        if Config.UPDATES_CHANNEL is not None:
+        if Config.FORCE_SUB_CHANNELS:
             back = await handle_force_sub(bot, message)
             if back == 400:
                 return
 
         if message.from_user.id in Config.BANNED_USERS:
-            await message.reply_text("Sorry, You are banned!\n\nContact [𝙎𝙪𝙥𝙥𝙤𝙧𝙩 𝙂𝙧𝙤𝙪𝙥](https://t.me/VJ_Bot_Disscussion)",
+            await message.reply_text("Sorry, You are banned!\n\nContact @Blade_9",
                                      disable_web_page_preview=True)
             return
 
-        if Config.OTHER_USERS_CAN_SAVE_FILE is False:
+        if not Config.OTHER_USERS_CAN_SAVE_FILE:
             return
 
         await message.reply_text(
@@ -140,8 +140,9 @@ async def main(bot: Client, message: Message):
             quote=True,
             disable_web_page_preview=True
         )
+
     elif message.chat.type == enums.ChatType.CHANNEL:
-        if (message.chat.id == int(Config.LOG_CHANNEL)) or (message.chat.id == int(Config.UPDATES_CHANNEL)) or message.forward_from_chat or message.forward_from:
+        if (message.chat.id == int(Config.LOG_CHANNEL)) or (message.chat.id in Config.FORCE_SUB_CHANNELS) or message.forward_from_chat or message.forward_from:
             return
         elif int(message.chat.id) in Config.BANNED_CHAT_IDS:
             await bot.leave_chat(message.chat.id)
@@ -163,6 +164,7 @@ async def main(bot: Client, message: Message):
                 private_ch = str(message.chat.id)[4:]
                 await forwarded_msg.reply_text(
                     f"#CHANNEL_BUTTON:\n\n[{message.chat.title}](https://t.me/c/{private_ch}/{CH_edit.id}) Channel's Broadcasted File's Button Added!")
+
         except FloodWait as sl:
             await asyncio.sleep(sl.value)
             await bot.send_message(
@@ -177,7 +179,6 @@ async def main(bot: Client, message: Message):
                 text=f"#ERROR_TRACEBACK:\nGot Error from `{str(message.chat.id)}` !!\n\n**Traceback:** `{err}`",
                 disable_web_page_preview=True
             )
-
 
 @Bot.on_message(filters.private & filters.command("broadcast") & filters.user(Config.BOT_OWNER) & filters.reply)
 async def broadcast_handler_open(_, m: Message):
@@ -309,8 +310,8 @@ async def clear_user_batch(bot: Client, m: Message):
 
 @Bot.on_callback_query()
 async def button(bot: Client, cmd: CallbackQuery):
-
     cb_data = cmd.data
+
     if "aboutbot" in cb_data:
         await cmd.message.edit(
             Config.ABOUT_BOT_TEXT,
@@ -318,8 +319,7 @@ async def button(bot: Client, cmd: CallbackQuery):
             reply_markup=InlineKeyboardMarkup(
                 [
                     [
-                        InlineKeyboardButton("Source Codes of Bot",
-                                             url="https://youtube.com/@Tech_VJ")
+                        InlineKeyboardButton("Source Codes of Bot", url="https://youtube.com/@Tech_VJ")
                     ],
                     [
                         InlineKeyboardButton("Go Home", callback_data="gotohome"),
@@ -336,8 +336,7 @@ async def button(bot: Client, cmd: CallbackQuery):
             reply_markup=InlineKeyboardMarkup(
                 [
                     [
-                        InlineKeyboardButton("Source Codes of Bot",
-                                             url="https://youtube.com/@Tech_VJ")
+                        InlineKeyboardButton("Source Codes of Bot", url="https://youtube.com/@Tech_VJ")
                     ],
                     [
                         InlineKeyboardButton("About Bot", callback_data="aboutbot"),
@@ -354,63 +353,6 @@ async def button(bot: Client, cmd: CallbackQuery):
             reply_markup=InlineKeyboardMarkup(
                 [
                     [
-                        InlineKeyboardButton("Updates Channel", url="https://t.me/VJ_Botz")
-                    ],
-                    [
-                        InlineKeyboardButton("About Bot", callback_data="aboutbot"),
-                        InlineKeyboardButton("About Dev", callback_data="aboutdevs"),
-                        InlineKeyboardButton("Close 🚪", callback_data="closeMessage")
-                    ],
-                    [
-                        InlineKeyboardButton("Support Group", url="https://t.me/VJ_Bot_Disscussion"),
-                        InlineKeyboardButton("YouTube Channel", url="https://youtube.com/@Tech_VJ")
-                    ]
-                ]
-            )
-        )
-
-    elif "refreshForceSub" in cb_data:
-        if Config.UPDATES_CHANNEL:
-            if Config.UPDATES_CHANNEL.startswith("-100"):
-                channel_chat_id = int(Config.UPDATES_CHANNEL)
-            else:
-                channel_chat_id = Config.UPDATES_CHANNEL
-            try:
-                user = await bot.get_chat_member(channel_chat_id, cmd.message.chat.id)
-                if user.status == "kicked":
-                    await cmd.message.edit(
-                        text="Sorry Sir, You are Banned to use me. Contact my [𝙎𝙪𝙥𝙥𝙤𝙧𝙩 𝙂𝙧𝙤𝙪𝙥](https://t.me/VJ_Bot_Disscussion).",
-                        disable_web_page_preview=True
-                    )
-                    return
-            except UserNotParticipant:
-                invite_link = await get_invite_link(channel_chat_id)
-                await cmd.message.edit(
-                    text="**I like Your Smartness But Don't Be Oversmart! 😑**\n\n",
-                    reply_markup=InlineKeyboardMarkup(
-                        [
-                            [
-                                InlineKeyboardButton("🤖 Join Updates Channel", url=invite_link.invite_link)
-                            ],
-                            [
-                                InlineKeyboardButton("🔄 Refresh 🔄", callback_data="refreshmeh")
-                            ]
-                        ]
-                    )
-                )
-                return
-            except Exception:
-                await cmd.message.edit(
-                    text="Something went Wrong. Contact my [𝙎𝙪𝙥𝙥𝙤𝙧𝙩 𝙂𝙧𝙤𝙪𝙥](https://t.me/VJ_Bot_Disscussion).",
-                    disable_web_page_preview=True
-                )
-                return
-        await cmd.message.edit(
-            text=Config.HOME_TEXT.format(cmd.message.chat.first_name, cmd.message.chat.id),
-            disable_web_page_preview=True,
-            reply_markup=InlineKeyboardMarkup(
-                [
-                    [
                         InlineKeyboardButton("Updates Channel", url="https://t.me/VJ_Botz"),
                         InlineKeyboardButton("Support Group", url="https://t.me/VJ_Bot_Disscussion")
                     ],
@@ -422,16 +364,80 @@ async def button(bot: Client, cmd: CallbackQuery):
             )
         )
 
+    elif "refreshForceSub" in cb_data:
+        if Config.FORCE_SUB_CHANNELS:
+            buttons = []
+            for channel_id in Config.FORCE_SUB_CHANNELS:
+                try:
+                    channel_info = await bot.get_chat(channel_id)
+                    channel_name = channel_info.title
+                    user = await bot.get_chat_member(channel_id, cmd.message.chat.id)
+                    if user.status == "kicked":
+                        await cmd.message.edit(
+                            text="Sorry Sir, You are Banned to use me. Contact @Blade_9.",
+                            disable_web_page_preview=True
+                        )
+                        return
+                except UserNotParticipant:
+                    try:
+                        invite_link = await get_invite_link(bot, channel_id)
+                    except Exception as err:
+                        print(f"Unable to do Force Subscribe to {channel_id}\n\nError: {err}")
+                        return
+
+                    buttons.append([InlineKeyboardButton(f"{channel_name}", url=invite_link.invite_link)])
+
+            if not buttons:
+                # User is a participant in all channels, return 200 (success)
+                await cmd.message.edit(
+                    text=Config.HOME_TEXT.format(cmd.message.chat.first_name, cmd.message.chat.id),
+                    disable_web_page_preview=True,
+                    reply_markup=InlineKeyboardMarkup(
+                        [
+                            [InlineKeyboardButton("Updates Channel", url="https://t.me/VJ_Botz")],
+                            [InlineKeyboardButton("About Bot", callback_data="aboutbot"),
+                             InlineKeyboardButton("About Dev", callback_data="aboutdevs")]
+                        ]
+                    )
+                )
+                return
+
+            try:
+                await cmd.message.edit(
+                    text="**Please Join My Updates Channel(s) to use this Bot!**",
+                    reply_markup=InlineKeyboardMarkup(buttons + [[InlineKeyboardButton("🔄 Refresh 🔄", callback_data="refreshmeh")]])
+                )
+            except Exception:
+                await cmd.message.edit(
+                    text="Something went Wrong. Contact @Blade_9",
+                    disable_web_page_preview=True
+                )
+                return
+        else:
+            # No force-subscribe channels configured, return 200 (success)
+            await cmd.message.edit(
+                text=Config.HOME_TEXT.format(cmd.message.chat.first_name, cmd.message.chat.id),
+                disable_web_page_preview=True,
+                reply_markup=InlineKeyboardMarkup(
+                    [
+                        [InlineKeyboardButton("Updates Channel", url="https://t.me/VJ_Botz")],
+                        [InlineKeyboardButton("About Bot", callback_data="aboutbot"),
+                         InlineKeyboardButton("About Dev", callback_data="aboutdevs")]
+                    ]
+                )
+            )
+            return
+
     elif cb_data.startswith("ban_user_"):
         user_id = cb_data.split("_", 2)[-1]
-        if Config.UPDATES_CHANNEL is None:
+        if Config.FORCE_SUB_CHANNELS is None:
             await cmd.answer("Sorry Sir, You didn't Set any Updates Channel!", show_alert=True)
             return
         if not int(cmd.from_user.id) == Config.BOT_OWNER:
             await cmd.answer("You are not allowed to do that!", show_alert=True)
             return
         try:
-            await bot.kick_chat_member(chat_id=int(Config.UPDATES_CHANNEL), user_id=int(user_id))
+            await bot.kick_chat_member(chat_id=int(Config.FORCE_SUB_CHANNELS), user_id=int(user_id))
             await cmd.answer("User Banned from Updates Channel!", show_alert=True)
         except Exception as e:
             await cmd.answer(f"Can't Ban Him!\n\nError: {e}", show_alert=True)
@@ -465,7 +471,8 @@ async def button(bot: Client, cmd: CallbackQuery):
 
     try:
         await cmd.answer()
-    except QueryIdInvalid: pass
+    except QueryIdInvalid:
+        pass
 
 
 Bot.run()
