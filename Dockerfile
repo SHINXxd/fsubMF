@@ -5,7 +5,7 @@ RUN apt-get -y update && \
     apt-get install -y --no-install-recommends git curl wget ffmpeg && \
     rm -rf /var/lib/apt/lists/*
 
-RUN pip3 install setuptools wheel yarl multidict
+RUN pip install setuptools wheel yarl multidict
 
 RUN git clone https://github.com/SHINXxd/fsubMF app
 
