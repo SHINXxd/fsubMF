@@ -29,7 +29,7 @@ async def handle_force_sub(bot: Client, cmd: Message):
             if user.status == "kicked":
                 await bot.send_message(
                     chat_id=user_id,
-                    text="Sorry Sir, You are Banned to use me. Contact @Blade_9".",
+                    text="Sorry Sir, You are Banned to use me. Contact @Blade_9.",
                     disable_web_page_preview=True
                 )
                 return 400
