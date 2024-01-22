@@ -31,7 +31,7 @@ RUN git clone https://github.com/SHINXxd/fsubMF app
 WORKDIR app
 
 # instaalling req
-RUN pip install -U -r requirements.txt
+RUN pip3 install -U -r requirements.txt
 
 RUN dpkg-reconfigure locales
 
