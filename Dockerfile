@@ -2,7 +2,7 @@ FROM python:3.11
 
 #update pkg &&  installing
 RUN apt-get -y update && \
-    apt-get install -y --no-install-recommends git curl wget ffmpeg && \
+    apt-get install -y --no-install-recommends git curl wget gnupg2 ffmpeg && \
     rm -rf /var/lib/apt/lists/*
 
 RUN pip install setuptools wheel yarl multidict
