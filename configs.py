@@ -6,8 +6,8 @@ class Config(object):
   BOT_TOKEN = os.environ.get("BOT_TOKEN", "6847882710:AAHDlPscai2YcU_TakwduvljH35IbX2uXTs")
   BOT_USERNAME = os.environ.get("BOT_USERNAME", "@JirayaSage_bot")
   DB_CHANNEL = int(os.environ.get("DB_CHANNEL", "-1001829601382"))
-  SHORTLINK_URL = os.environ.get('SHORTLINK_URL', "")
-  SHORTLINK_API = os.environ.get('SHORTLINK_API', "")
+  SHORTLINK_URL = os.environ.get('SHORTLINK_URL', "https://upshrink.com/")
+  SHORTLINK_API = os.environ.get('SHORTLINK_API', "e887fcafa07355461af41ada1de0fe0fa1b29a85")
   BOT_OWNER = int(os.environ.get("BOT_OWNER", "5468078784"))
   DATABASE_URL = os.environ.get("DATABASE_URL", "mongodb+srv://lodukuwaraboy:Qwerty12@cluster0.mfey0ob.mongodb.net/?retryWrites=true&w=majority")
   FORCE_SUB_CHANNELS = [-1001811788351, -1002132279172, -1002127474493]
